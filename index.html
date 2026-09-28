@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planespotting Time with Dani</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:#071a3d;color:#fff}
+button{font:inherit}
+#app{min-height:100vh;background:#071a3d;overflow:hidden}
+.pixel{font-family:monospace;letter-spacing:.5px}
+
+.top{
+padding:24px 28px;
+background:#0b2555;
+border-bottom:4px solid #163d78;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:20px
+}
+
+.brand h1{margin:0;font-size:28px}
+.brand p{margin:6px 0 0;color:#9dc8ff}
+.badge{
+background:#fff;
+color:#071a3d;
+padding:9px 13px;
+border-radius:8px;
+font-weight:800
+}
+
+.locations{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:14px;
+padding:22px 28px;
+background:#09214b
+}
+
+.loc{
+border:2px solid #2e64a8;
+background:#103066;
+color:#fff;
+padding:17px;
+border-radius:10px;
+cursor:pointer;
+text-align:left;
+min-height:82px
+}
+
+.loc:hover{
+background:#16417e;
+transform:translateY(-2px)
+}
+
+.loc strong{display:block;font-size:16px}
+.loc small{color:#9dc8ff}
+
+.world{
+position:relative;
+height:calc(100vh - 185px);
+min-height:560px;
+overflow:hidden;
+background:#73c9ff
+}
+
+.scene{
+position:absolute;
+inset:0;
+display:none
+}
+
+.scene.active{display:block}
+
+.sky{
+position:absolute;
+inset:0;
+background:linear-gradient(#58bdf5 0%,#aee7ff 62%,#ccefff 100%)
+}
+
+.cloud{
+position:absolute;
+width:150px;
+height:40px;
+background:#fff;
+box-shadow:22px -18px 0 #fff,65px -11px 0 #fff;
+border-radius:30px;
+opacity:.9
+}
+
+.cloud.c1{left:10%;top:14%}
+.cloud.c2{right:18%;top:28%;transform:scale(.8)}
+
+.buildings{
+position:absolute;
+bottom:0;
+left:0;
+right:0;
+height:42%;
+display:flex;
+align-items:end;
+gap:8px;
+padding:0 25px;
+background:linear-gradient(#9fd3f2,#8ac3e6)
+}
+
+.b{
+width:8%;
+background:#d7e4ed;
+border:2px solid #708ba5;
+position:relative
+}
+
+.b:after{
+content:'•• •• ••';
+position:absolute;
+top:20px;
+left:8px;
+color:#3171a8;
+line-height:32px;
+white-space:pre-wrap
+}
+
+.b:nth-child(1){height:75%}
+.b:nth-child(2){height:55%}
+.b:nth-child(3){height:90%}
+.b:nth-child(4){height:64%}
+.b:nth-child(5){height:48%}
+.b:nth-child(6){height:82%}
+.b:nth-child(7){height:60%}
+.b:nth-child(8){height:72%}
+
+.road{
+position:absolute;
+bottom:0;
+left:0;
+right:0;
+height:17%;
+background:#48566b;
+border-top:6px solid #eee
+}
+
+.road:after{
+content:'';
+position:absolute;
+top:45%;
+left:0;
+right:0;
+border-top:6px dashed #ffd86b
+}
+
+.water{
+position:absolute;
+inset:48% 0 0;
+background:#178ed1
+}
+
+.sand{
+position:absolute;
+bottom:0;
+left:0;
+right:0;
+height:17%;
+background:#efd08b
+}
+
+.terrace{
+position:absolute;
+bottom:17%;
+left:7%;
+width:86%;
+height:38%;
+border:7px solid #e9e9e9;
+background:rgba(255,255,255,.18);
+box-shadow:0 0 0 3px #b7b7b7
+}
+
+.rail{
+position:absolute;
+bottom:0;
+left:0;
+right:0;
+height:23%;
+border-top:8px solid #ddd;
+background:rgba(255,255,255,.12)
+}
+
+.sun{
+position:absolute;
+right:11%;
+top:8%;
+width:75px;
+height:75px;
+background:#ffd83d;
+border-radius:50%;
+box-shadow:0 0 35px #fff2a6
+}
+
+.ship{
+position:absolute;
+bottom:28%;
+width:110px;
+height:18px;
+background:#eee;
+border-radius:4px 4px 12px 12px
+}
+
+.ship:before{
+content:'';
+position:absolute;
+left:30px;
+bottom:18px;
+width:45px;
+height:18px;
+background:#eee
+}
+
+.ship.s1{left:18%}
+.ship.s2{left:49%;transform:scale(.75)}
+
+.yacht{
+right:20%;
+bottom:31%;
+width:65px;
+height:15px;
+background:#fff;
+position:absolute;
+clip-path:polygon(0 0,100% 0,80% 100%,15% 100%)
+}
+
+.airport{background:#88ccec}
+
+.fence{
+position:absolute;
+bottom:24%;
+left:0;
+right:0;
+height:22%;
+background:repeating-linear-gradient(90deg,transparent 0 25px,#555 25px 29px),linear-gradient(#777,#777);
+opacity:.9
+}
+
+.terminal{
+position:absolute;
+bottom:23%;
+left:9%;
+width:44%;
+height:25%;
+background:#dfe9ed;
+border:4px solid #758a98
+}
+
+.runway{
+position:absolute;
+bottom:6%;
+left:0;
+right:0;
+height:18%;
+background:#424a55;
+border-top:4px solid #fff
+}
+
+.runway:after{
+content:'';
+position:absolute;
+top:48%;
+left:0;
+right:0;
+border-top:5px dashed #fff
+}
+
+.parked{
+position:absolute;
+bottom:49%;
+right:8%;
+font-size:45px
+}
+
+.topoli{background:#7fcf73}
+
+.hill{
+position:absolute;
+bottom:0;
+width:100%;
+height:48%;
+background:#46984b;
+clip-path:polygon(0 45%,15% 28%,28% 47%,42% 18%,58% 45%,73% 25%,88% 46%,100% 20%,100% 100%,0 100%)
+}
+
+.village{
+position:absolute;
+bottom:15%;
+left:10%;
+right:10%;
+display:flex;
+gap:28px;
+align-items:end
+}
+
+.house{
+width:110px;
+height:105px;
+background:#e8d6b2;
+border:3px solid #7e5b3b;
+position:relative
+}
+
+.house:before{
+content:'';
+position:absolute;
+left:-12px;
+top:-43px;
+border-left:67px solid transparent;
+border-right:67px solid transparent;
+border-bottom:43px solid #9e4c3b
+}
+
+.house:after{
+content:'▦';
+position:absolute;
+left:40px;
+top:45px;
+font-size:25px;
+color:#4d7392
+}
+
+.plane{
+position:absolute;
+width:104px;
+height:42px;
+z-index:5;
+filter:drop-shadow(3px 4px 0 rgba(0,0,0,.28));
+display:none
+}
+
+.plane .fuselage{
+position:absolute;
+left:18px;
+top:13px;
+width:72px;
+height:14px;
+background:#f5f5f5;
+border:2px solid #26354d;
+border-radius:10px
+}
+
+.plane .nose{
+position:absolute;
+right:8px;
+top:14px;
+width:18px;
+height:12px;
+background:#f5f5f5;
+border-right:2px solid #26354d;
+border-top:2px solid #26354d;
+border-radius:0 12px 0 0;
+transform:skewX(-22deg)
+}
+
+.plane .wing{
+position:absolute;
+left:43px;
+top:5px;
+width:40px;
+height:11px;
+background:#f5f5f5;
+border:2px solid #26354d;
+transform:skewX(-28deg)
+}
+
+.plane .wing2{
+position:absolute;
+left:43px;
+top:25px;
+width:40px;
+height:11px;
+background:#f5f5f5;
+border:2px solid #26354d;
+transform:skewX(28deg)
+}
+
+.plane .tail{
+position:absolute;
+left:11px;
+top:5px;
+width:25px;
+height:27px;
+background:#fff;
+border:2px solid #26354d;
+clip-path:polygon(25% 100%,0 0,100% 0,78% 100%)
+}
+
+.plane.wizz .tail{
+background:linear-gradient(90deg,#7b25b7 0 52%,#172e69 52%)
+}
+
+.plane.isr .tail{
+background:#1768b5
+}
+
+.plane.isr .tail:after{
+content:'★';
+position:absolute;
+color:#ff8b21;
+font-size:17px;
+left:3px;
+top:3px
+}
+
+.plane.smart .tail{
+background:#fff
+}
+
+.p1{top:24%;left:-110px}
+.p2{top:28%;right:-110px;transform:scaleX(-1)}
+.p3{top:18%;left:-110px}
+.p4{top:33%;right:-110px;transform:scaleX(-1)}
+.p5{top:22%;left:-110px}
+.p6{top:38%;right:-110px;transform:scaleX(-1)}
+
+.fly-left{
+animation:flyLeft 5s linear forwards
+}
+
+.fly-right{
+animation:flyRight 5s linear forwards
+}
+
+@keyframes flyLeft{
+from{left:-120px}
+to{left:110%}
+}
+
+@keyframes flyRight{
+from{right:-120px}
+to{right:110%}
+}
+
+.phone{
+position:absolute;
+right:25px;
+bottom:22px;
+width:92px;
+height:175px;
+background:#111;
+border:5px solid #555;
+border-radius:17px;
+z-index:10;
+box-shadow:0 8px 25px #0008
+}
+
+.phoneScreen{
+margin:8px;
+background:#1d4d83;
+height:125px;
+border-radius:9px;
+padding:9px;
+font-size:10px
+}
+
+.phoneHome{
+position:absolute;
+bottom:7px;
+left:35px;
+width:17px;
+height:17px;
+border:2px solid #aaa;
+border-radius:50%
+}
+
+.phone button{
+position:absolute;
+bottom:30px;
+left:17px;
+width:54px;
+border:0;
+border-radius:5px;
+padding:7px;
+background:#fff;
+color:#111;
+font-weight:bold;
+cursor:pointer
+}
+
+.cameraUI{
+display:none;
+position:absolute;
+inset:0;
+background:rgba(0,0,0,.3);
+z-index:20;
+pointer-events:none
+}
+
+.cameraUI .rec{
+position:absolute;
+top:25px;
+left:25px;
+background:#c00;
+padding:7px 12px;
+border-radius:4px;
+font-weight:bold
+}
+
+.cameraUI .reticle{
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+font-size:42px
+}
+
+.cameraUI.recording{
+display:block
+}
+
+.cameraUI.recording .rec:before{
+content:'● ';
+color:#ff3b3b
+}
+
+.modal{
+display:none;
+position:absolute;
+inset:0;
+background:#0009;
+z-index:30;
+align-items:center;
+justify-content:center
+}
+
+.modal.show{display:flex}
+
+.card{
+width:min(520px,90%);
+background:#f5fbff;
+color:#09214b;
+border:5px solid #2d67a5;
+border-radius:12px;
+padding:28px;
+text-align:center;
+box-shadow:0 20px 60px #0008
+}
+
+.card h2{
+margin-top:0;
+font-size:30px
+}
+
+.close{
+border:0;
+background:#0d3970;
+color:#fff;
+padding:12px 22px;
+border-radius:7px;
+cursor:pointer;
+font-weight:bold
+}
+
+.hint{
+position:absolute;
+left:25px;
+bottom:24px;
+background:#09214bdd;
+padding:12px 15px;
+border-radius:8px;
+z-index:8
+}
+
+.hidden{display:none!important}
+
+@media(max-width:800px){
+.locations{grid-template-columns:repeat(2,1fr)}
+.world{height:calc(100vh - 275px)}
+.top{padding:18px}
+.brand h1{font-size:21px}
+.phone{
+transform:scale(.85);
+transform-origin:bottom right
+}
+.hint{
+max-width:65%;
+font-size:12px
+}
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+<header class="top">
+<div class="brand">
+<h1 class="pixel">✈ PLANESPOTTING TIME WITH DANI</h1>
+<p>Varna aircraft spotting — pixel world edition</p>
+</div>
+<div class="badge">VARNA 🇧🇬</div>
+</header>
+
+<nav class="locations">
+
+<button class="loc" data-scene="const">
+<strong>St. St. Konstantine and Helena</strong>
+<small>Terrace • sea • clear sky</small>
+</button>
+
+<button class="loc" data-scene="city">
+<strong>Varna city</strong>
+<small>Buildings • streets • spotting</small>
+</button>
+
+<button class="loc" data-scene="topoli">
+<strong>Village Topoli</strong>
+<small>Village • hills • aircraft</small>
+</button>
+
+<button class="loc" data-scene="airport">
+<strong>Varna Airport</strong>
+<small>Fence • terminal • runway</small>
+</button>
+
+</nav>
+
+<main class="world">
+
+<section id="const" class="scene active">
+
+<div class="sky"></div>
+<div class="sun"></div>
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+<div class="water"></div>
+<div class="sand"></div>
+
+<div class="terrace">
+<div class="rail"></div>
+</div>
+
+<div class="ship s1"></div>
+<div class="ship s2"></div>
+<div class="yacht"></div>
+
+<div class="plane wizz p1" data-air="wizz">
+<span class="fuselage"></span>
+<span class="nose"></span>
+<span class="wing"></span>
+<span class="wing2"></span>
+<span class="tail"></span>
+</div>
+
+<div class="plane isr p2" data-air="isr">
+<span class="fuselage"></span>
+<span class="nose"></span>
+<span class="wing"></span>
+<span class="wing2"></span>
+<span class="tail"></span>
+</div>
+
+<div class="hint">
+🌊 Relax on the terrace and watch the sky...
+</div>
+
+</section>
+
+
+<section id="city" class="scene">
+
+<div class="sky"></div>
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+
+<div class="buildings">
+<div class="b"></div>
+<div class="b"></div>
+<div class="b"></div>
+<div class="b"></div>
+<div class="b"></div>
+<div class="b"></div>
+<div class="b"></div>
+<div class="b"></div>
+</div>
+
+<div class="road"></div>
+
+<div class="plane wizz p3" data-air="wizz">
+<span class="fuselage"></span>
+<span class="nose"></span>
+<span class="wing"></span>
+<span class="wing2"></span>
+<span class="tail"></span>
+</div>
+
+<div class="plane smart p4" data-air="smart">
+<span class="fuselage"></span>
+<span class="nose"></span>
+<span class="wing"></span>
+<span class="wing2"></span>
+<span class="tail"></span>
+</div>
+
+<div class="hint">
+🏙️ Look around Varna city. A flight may appear unexpectedly...
+</div>
+
+</section>
+
+
+<section id="topoli" class="scene">
+
+<div class="sky"></div>
+<div class="cloud c1"></div>
+<div class="hill"></div>
+
+<div class="village">
+<div class="house"></div>
+<div class="house"></div>
+<div class="house"></div>
+</div>
+
+<div class="plane smart p5" data-air="smart">
+<span class="fuselage"></span>
+<span class="nose"></span>
+<span class="wing"></span>
+<span class="wing2"></span>
+<span class="tail"></span>
+</div>
+
+<div class="plane wizz p6" data-air="wizz">
+<span class="fuselage"></span>
+<span class="nose"></span>
+<span class="wing"></span>
+<span class="wing2"></span>
+<span class="tail"></span>
+</div>
+
+<div class="hint">
+🌾 Topoli spotting — keep looking up!
+</div>
+
+</section>
+
+
+<section id="airport" class="scene airport">
+
+<div class="sky"></div>
+<div class="cloud c1"></div>
+<div class="terminal"></div>
+<div class="parked">✈　✈　✈</div>
+<div class="fence"></div>
+<div class="runway"></div>
+
+<div class="plane isr p3" data-air="isr">
+<span class="fuselage"></span>
+<span class="nose"></span>
+<span class="wing"></span>
+<span class="wing2"></span>
+<span class="tail"></span>
+</div>
+
+<div class="plane wizz p4" data-air="wizz">
+<span class="fuselage"></span>
+<span class="nose"></span>
+<span class="wing"></span>
+<span class="wing2"></span>
+<span class="tail"></span>
+</div>
+
+<div class="hint">
+🛫 You are standing by the airport fence. Listen for arrivals and departures.
+</div>
+
+</section>
+
+
+<div class="phone" id="phone">
+
+<div class="phoneScreen" id="phoneScreen">
+PHONE<br><br>
+📱 MENU<br><br>
+Tap CAMERA
+</div>
+
+<button id="cameraBtn">CAMERA</button>
+
+<div class="phoneHome"></div>
+
+</div>
+
+
+<div class="cameraUI" id="cameraUI">
+
+<div class="rec" id="recText">REC</div>
+
+<div class="reticle">⊞</div>
+
+</div>
+
+
+<div class="modal" id="modal">
+
+<div class="card">
+
+<h2>CONGRATS! 🎉</h2>
+
+<p id="catchText"></p>
+
+<button class="close" id="close">
+CONTINUE SPOTTING
+</button>
+
+</div>
+
+</div>
+
+</main>
+</div>
+
+
+<script>
+
+const aircraft={
+
+wizz:{
+name:'Wizz Air A321neo',
+ft:'2,500',
+reg:'9W-HDD',
+livery:'Wizz Air',
+route:'landing'
+},
+
+smart:{
+name:'Smartwings Airlines B737 MAX 8-200',
+ft:'2,456',
+reg:'9-FEST',
+livery:'Smartwings Airlines',
+route:'takeoff'
+},
+
+isr:{
+name:'ISR Airlines A320',
+ft:'2,800',
+reg:'4X-DMS',
+livery:'ISR Airlines',
+route:'landing'
+}
+
+};
+
+
+const scenes=[...document.querySelectorAll('.scene')];
+
+let active='const';
+let flightTimer=null;
+let recording=false;
+let target=null;
+
+
+function showScene(id){
+
+active=id;
+
+scenes.forEach(s=>
+s.classList.toggle('active',s.id===id)
+);
+
+stopFlight();
+
+document
+.getElementById('cameraUI')
+.classList.remove('recording');
+
+recording=false;
+
+document.getElementById('phoneScreen').innerHTML=
+'PHONE<br><br>📱 MENU<br><br>Tap CAMERA';
+
+scheduleFlight();
+
+}
+
+
+document
+.querySelectorAll('.loc')
+.forEach(b=>
+b.addEventListener('click',()=>
+showScene(b.dataset.scene)
+));
+
+
+function stopFlight(){
+
+clearTimeout(flightTimer);
+
+document
+.querySelectorAll('.plane')
+.forEach(p=>{
+
+p.classList.remove('fly-left','fly-right');
+
+p.style.display='none';
+
+});
+
+target=null;
+
+}
+
+
+function scheduleFlight(){
+
+flightTimer=setTimeout(
+spawnFlight,
+1800+Math.random()*2800
+);
+
+}
+
+
+function spawnFlight(){
+
+const scene=document.getElementById(active);
+
+const planes=[
+...scene.querySelectorAll('.plane')
+];
+
+if(!planes.length)return;
+
+const p=
+planes[Math.floor(Math.random()*planes.length)];
+
+target=p.dataset.air;
+
+p.style.display='block';
+
+const fromLeft=
+p.classList.contains('p1')||
+p.classList.contains('p3')||
+p.classList.contains('p5');
+
+p.classList.add(
+fromLeft?'fly-left':'fly-right'
+);
+
+
+p.addEventListener(
+'animationend',
+()=>{
+
+p.style.display='none';
+
+p.classList.remove(
+'fly-left',
+'fly-right'
+);
+
+if(recording&&target){
+
+recording=false;
+
+document
+.getElementById('cameraUI')
+.classList.remove('recording');
+
+catchAircraft(target);
+
+}
+
+scheduleFlight();
+
+},
+{once:true}
+);
+
+
+playEngineCue(fromLeft);
+
+}
+
+
+function playEngineCue(fromLeft){
+
+try{
+
+const C=
+window.AudioContext||
+window.webkitAudioContext;
+
+if(!C)return;
+
+const c=new C();
+
+const o=c.createOscillator();
+const g=c.createGain();
+
+const l=c.createOscillator();
+const lg=c.createGain();
+
+o.type='sawtooth';
+l.type='sine';
+
+o.frequency.setValueAtTime(
+90,c.currentTime
+);
+
+o.frequency.exponentialRampToValueAtTime(
+55,c.currentTime+2.8
+);
+
+l.frequency.setValueAtTime(
+42,c.currentTime
+);
+
+l.frequency.exponentialRampToValueAtTime(
+30,c.currentTime+3
+);
+
+g.gain.setValueAtTime(
+.0001,c.currentTime
+);
+
+g.gain.exponentialRampToValueAtTime(
+.045,c.currentTime+.3
+);
+
+g.gain.exponentialRampToValueAtTime(
+.0001,c.currentTime+3
+);
+
+lg.gain.setValueAtTime(
+.0001,c.currentTime
+);
+
+lg.gain.exponentialRampToValueAtTime(
+.025,c.currentTime+.2
+);
+
+lg.gain.exponentialRampToValueAtTime(
+.0001,c.currentTime+3
+);
+
+o.connect(g).connect(c.destination);
+
+l.connect(lg).connect(c.destination);
+
+o.start();
+l.start();
+
+o.stop(c.currentTime+3.1);
+l.stop(c.currentTime+3.1);
+
+setTimeout(
+()=>c.close(),
+3400
+);
+
+}catch(e){}
+
+}
+
+
+document
+.getElementById('cameraBtn')
+.addEventListener('click',()=>{
+
+const ui=
+document.getElementById('cameraUI');
+
+if(!ui.classList.contains('recording')){
+
+ui.classList.add('recording');
+
+recording=true;
+
+document.getElementById('phoneScreen').innerHTML=
+'<b>CAMERA</b><br><br>🔴 RECORDING<br><br>Point at the aircraft!';
+
+}else{
+
+ui.classList.remove('recording');
+
+recording=false;
+
+document.getElementById('phoneScreen').innerHTML=
+'<b>CAMERA</b><br><br>Recording stopped';
+
+}
+
+});
+
+
+function catchAircraft(key){
+
+const a=aircraft[key];
+
+document.getElementById('catchText').textContent=
+`CONGRATS! You catched ${a.name} at ${a.ft} ft with registration ${a.reg}.`;
+
+document
+.getElementById('modal')
+.classList.add('show');
+
+document.getElementById('phoneScreen').innerHTML=
+`<b>CAUGHT!</b><br><br>${a.livery}<br>${a.name}<br>${a.ft} ft`;
+
+}
+
+
+document
+.getElementById('close')
+.addEventListener(
+'click',
+()=>
+document
+.getElementById('modal')
+.classList.remove('show')
+);
+
+
+scheduleFlight();
+
+</script>
+
+</body>
+</html>
